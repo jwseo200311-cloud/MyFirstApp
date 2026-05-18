@@ -1,0 +1,12 @@
+# .NET 빌드 결과물
+bin/
+obj/
+
+# VS / VS Code 설정
+.vs/
+.vscode/
+*.user
+
+# OS 파일
+.DS_Store
+Thumbs.db
