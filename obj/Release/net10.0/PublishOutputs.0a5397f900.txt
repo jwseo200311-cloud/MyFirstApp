@@ -1,0 +1,13 @@
+C:\dev\MyFirstApp\publish\MyFirstApp.exe
+C:\dev\MyFirstApp\publish\appsettings.Development.json
+C:\dev\MyFirstApp\publish\appsettings.json
+C:\dev\MyFirstApp\publish\MyFirstApp.dll
+C:\dev\MyFirstApp\publish\MyFirstApp.runtimeconfig.json
+C:\dev\MyFirstApp\publish\MyFirstApp.pdb
+C:\dev\MyFirstApp\publish\BCrypt-Net-Next.dll
+C:\dev\MyFirstApp\publish\Microsoft.EntityFrameworkCore.dll
+C:\dev\MyFirstApp\publish\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\dev\MyFirstApp\publish\Microsoft.EntityFrameworkCore.Relational.dll
+C:\dev\MyFirstApp\publish\MySqlConnector.dll
+C:\dev\MyFirstApp\publish\Pomelo.EntityFrameworkCore.MySql.dll
+C:\dev\MyFirstApp\publish\MyFirstApp.deps.json
