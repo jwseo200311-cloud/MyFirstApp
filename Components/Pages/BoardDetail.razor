@@ -1,0 +1,88 @@
+@page "/board/{Id:int}"
+@rendermode InteractiveServer
+@using MyFirstApp.Data
+@using MyFirstApp.Models
+@inject AppDbContext Db
+@inject NavigationManager Navigation
+
+<PageTitle>글 보기</PageTitle>
+
+@if (post == null)
+{
+    <p>글을 찾을 수 없습니다.</p>
+    <button class="btn btn-secondary" @onclick="GoList">목록으로</button>
+}
+else if (isEditing)
+{
+    <h1>글 수정</h1>
+    <div style="max-width: 600px;">
+        <div class="mb-3">
+            <label class="form-label">제목</label>
+            <input class="form-control" @bind="editTitle" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">내용</label>
+            <textarea class="form-control" rows="8" @bind="editContent"></textarea>
+        </div>
+        <button class="btn btn-primary" @onclick="SaveEdit">저장</button>
+        <button class="btn btn-secondary" @onclick="CancelEdit">취소</button>
+    </div>
+}
+else
+{
+    <h1>@post.Title</h1>
+    <p class="text-muted">작성일: @post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
+    <hr />
+    <p style="white-space: pre-wrap;">@post.Content</p>
+    <hr />
+    <button class="btn btn-secondary" @onclick="GoList">목록</button>
+    <button class="btn btn-warning" @onclick="StartEdit">수정</button>
+    <button class="btn btn-danger" @onclick="DeletePost">삭제</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Post? post;
+    private bool isEditing = false;
+    private string editTitle = "";
+    private string editContent = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        post = await Db.Posts.FindAsync(Id);
+    }
+
+    private void GoList()
+    {
+        Navigation.NavigateTo("/board");
+    }
+
+    private void StartEdit()
+    {
+        editTitle = post!.Title;
+        editContent = post.Content;
+        isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+    }
+
+    private async Task SaveEdit()
+    {
+        post!.Title = editTitle;
+        post.Content = editContent;
+        await Db.SaveChangesAsync();
+        isEditing = false;
+    }
+
+    private async Task DeletePost()
+    {
+        Db.Posts.Remove(post!);
+        await Db.SaveChangesAsync();
+        Navigation.NavigateTo("/board");
+    }
+}

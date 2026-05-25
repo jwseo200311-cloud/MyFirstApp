@@ -1,0 +1,63 @@
+@page "/board"
+@rendermode InteractiveServer
+@using MyFirstApp.Data
+@using MyFirstApp.Models
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext Db
+@inject NavigationManager Navigation
+
+<PageTitle>게시판</PageTitle>
+
+<h1>게시판</h1>
+
+<button class="btn btn-primary mb-3" @onclick="GoWrite">+ 글쓰기</button>
+
+@if (posts == null)
+{
+    <p>불러오는 중...</p>
+}
+else if (posts.Count == 0)
+{
+    <p>아직 글이 없습니다.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성일</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var post in posts)
+            {
+                <tr style="cursor: pointer;" @onclick="() => GoDetail(post.Id)">
+                    <td>@post.Id</td>
+                    <td>@post.Title</td>
+                    <td>@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Post>? posts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await Db.Posts.OrderByDescending(p => p.CreatedAt).ToListAsync();
+    }
+
+    private void GoWrite()
+    {
+        Navigation.NavigateTo("/board/write");
+    }
+
+    private void GoDetail(int id)
+    {
+        Navigation.NavigateTo($"/board/{id}");
+    }
+}

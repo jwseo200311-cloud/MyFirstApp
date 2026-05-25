@@ -1,0 +1,62 @@
+@page "/board/write"
+@rendermode InteractiveServer
+@using MyFirstApp.Data
+@using MyFirstApp.Models
+@inject AppDbContext Db
+@inject NavigationManager Navigation
+
+<PageTitle>글쓰기</PageTitle>
+
+<h1>글쓰기</h1>
+
+<div style="max-width: 600px;">
+    <div class="mb-3">
+        <label class="form-label">제목</label>
+        <input class="form-control" @bind="title" placeholder="제목 입력" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">내용</label>
+        <textarea class="form-control" rows="8" @bind="content" placeholder="내용 입력"></textarea>
+    </div>
+
+    <button class="btn btn-primary" @onclick="SavePost">저장</button>
+    <button class="btn btn-secondary" @onclick="GoBack">취소</button>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <p class="mt-3" style="color: red;">@message</p>
+    }
+</div>
+
+@code {
+    private string title = "";
+    private string content = "";
+    private string message = "";
+
+    private async Task SavePost()
+    {
+        if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(content))
+        {
+            message = "제목과 내용을 모두 입력하세요.";
+            return;
+        }
+
+        var post = new Post
+        {
+            Title = title,
+            Content = content,
+            CreatedAt = DateTime.Now
+        };
+
+        Db.Posts.Add(post);
+        await Db.SaveChangesAsync();
+
+        Navigation.NavigateTo("/board");
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/board");
+    }
+}

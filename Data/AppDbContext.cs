@@ -11,4 +11,5 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }  // users 테이블과 연결
+    public DbSet<Post> Posts { get; set; }
 }
