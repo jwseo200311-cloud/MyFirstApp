@@ -1,68 +1,82 @@
 @page "/login"
-@rendermode InteractiveServer
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
 @using MyFirstApp.Data
 @using MyFirstApp.Models
 @inject AppDbContext Db
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Navigation
 
 <PageTitle>로그인</PageTitle>
 
 <h1>로그인</h1>
 
 <div style="max-width: 400px;">
-    <div class="mb-3">
-        <label class="form-label">아이디</label>
-        <input class="form-control" @bind="username" placeholder="아이디 입력" />
-    </div>
+    <EditForm Model="this" OnValidSubmit="HandleLogin" FormName="loginForm">
+        <div class="mb-3">
+            <label class="form-label">아이디</label>
+            <InputText class="form-control" @bind-Value="username" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">비밀번호</label>
-        <input type="password" class="form-control" @bind="password" placeholder="비밀번호 입력" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">비밀번호</label>
+            <InputText type="password" class="form-control" @bind-Value="password" />
+        </div>
 
-    <button class="btn btn-primary" @onclick="HandleLogin">로그인</button>
+        <button type="submit" class="btn btn-primary">로그인</button>
+    </EditForm>
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <p class="mt-3" style="color: @messageColor;">@message</p>
+        <p class="mt-3" style="color: red;">@message</p>
     }
 </div>
 
 @code {
-    private string username = "";
-    private string password = "";
-    private string message = "";
-    private string messageColor = "red";
+    [SupplyParameterFromForm]
+    private string? username { get; set; }
 
-    private void HandleLogin()
+    [SupplyParameterFromForm]
+    private string? password { get; set; }
+
+    private string message = "";
+
+    private async Task HandleLogin()
     {
-        // 1. 빈 칸 검사
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
             message = "아이디와 비밀번호를 입력하세요.";
-            messageColor = "red";
             return;
         }
 
-        // 2. DB에서 해당 아이디 찾기
         var user = Db.Users.FirstOrDefault(u => u.Username == username);
         if (user == null)
         {
             message = "존재하지 않는 아이디입니다.";
-            messageColor = "red";
             return;
         }
 
-        // 3. 비밀번호 비교 (입력한 비번을 해시해서 저장된 해시와 대조)
         bool valid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
         if (!valid)
         {
             message = "비밀번호가 틀렸습니다.";
-            messageColor = "red";
             return;
         }
 
-        // 4. 성공
-        message = $"{user.Username}님, 로그인 성공! 환영합니다.";
-        messageColor = "green";
+        // 로그인 성공 → 쿠키에 사용자 정보 저장
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, user.Username)
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        var httpContext = HttpContextAccessor.HttpContext;
+        await httpContext!.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal);
+
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 }
