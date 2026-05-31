@@ -5,6 +5,7 @@
 @using MyFirstApp.Models
 @inject AppDbContext Db
 @inject NavigationManager Navigation
+@inject MyFirstApp.Services.PushbulletService Pushbullet
 
 <PageTitle>글쓰기</PageTitle>
 
@@ -52,6 +53,10 @@
 
         Db.Posts.Add(post);
         await Db.SaveChangesAsync();
+
+        await Pushbullet.SendNotificationAsync(
+            "새 게시글",
+            $"새 글이 올라왔습니다: {title}");
 
         Navigation.NavigateTo("/board");
     }
